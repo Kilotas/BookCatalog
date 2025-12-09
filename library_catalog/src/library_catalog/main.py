@@ -1,5 +1,5 @@
 """
-Library Catalog API - Точка входа приложения.
+Library Catalog API это точка входа приложения.
 """
 
 from contextlib import asynccontextmanager
