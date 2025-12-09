@@ -13,8 +13,6 @@ from ..domain.services.book_service import BookService
 from ..external.openlibrary.client import OpenLibraryClient
 
 
-
-
 @lru_cache
 def get_openlibrary_client() -> OpenLibraryClient:
     """
@@ -29,18 +27,14 @@ def get_openlibrary_client() -> OpenLibraryClient:
     )
 
 
-
-
 async def get_book_repository(
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> BookRepository:
     """
     Возвращает экземпляр BookRepository.
     Создаётся новый репозиторий на каждый HTTP запрос.
     """
     return BookRepository(db)
-
-
 
 
 async def get_book_service(
@@ -56,8 +50,6 @@ async def get_book_service(
         book_repository=book_repo,
         openlibrary_client=ol_client,
     )
-
-
 
 
 BookServiceDep = Annotated[BookService, Depends(get_book_service)]

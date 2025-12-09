@@ -31,8 +31,6 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-
-
     @field_validator("database_url")
     @classmethod
     def validate_postgres_dsn(cls, v: PostgresDsn) -> PostgresDsn:
@@ -48,5 +46,6 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
 
 settings = get_settings()

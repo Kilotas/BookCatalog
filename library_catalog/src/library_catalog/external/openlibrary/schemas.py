@@ -21,10 +21,7 @@ class OpenLibrarySearchDoc(BaseModel):
     publisher: Optional[List[str]] = None
     language: Optional[List[str]] = None
     ratings_average: Optional[float] = Field(
-        None,
-        alias="ratings_average",
-        ge=MIN_RATING,
-        le=MAX_RATING
+        None, alias="ratings_average", ge=MIN_RATING, le=MAX_RATING
     )
 
     class Config:

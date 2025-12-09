@@ -19,11 +19,11 @@ class BaseApiClient(ABC):
     """
 
     def __init__(
-            self,
-            base_url: str,
-            timeout: float = 10.0,
-            retries: int = 3,
-            backoff: float = 0.5,
+        self,
+        base_url: str,
+        timeout: float = 10.0,
+        retries: int = 3,
+        backoff: float = 0.5,
     ):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
@@ -63,12 +63,12 @@ class BaseApiClient(ABC):
         return self.base_url + path
 
     async def _request(
-            self,
-            method: str,
-            path: str,
-            params: Optional[Dict[str, Any]] = None,
-            json: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None,
+        self,
+        method: str,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        json: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         Выполнить HTTP запрос с retry логикой.
@@ -110,13 +110,10 @@ class BaseApiClient(ABC):
                     headers=headers,
                 )
 
-
                 response.raise_for_status()
-
 
                 if response.status_code == 204 or not response.content:
                     return {}
-
 
                 try:
                     return response.json()
@@ -133,17 +130,15 @@ class BaseApiClient(ABC):
                         f"Request timed out after {self.timeout}s"
                     )
 
-
-                wait_time = self.backoff * (2 ** attempt)
+                wait_time = self.backoff * (2**attempt)
                 self.logger.info(f"Waiting {wait_time}s before retry...")
                 await asyncio.sleep(wait_time)
 
             except httpx.HTTPStatusError as e:
                 self.logger.warning(f"HTTP error {e.response.status_code}")
 
-
                 if e.response.status_code >= 500 and attempt < self.retries - 1:
-                    wait_time = self.backoff * (2 ** attempt)
+                    wait_time = self.backoff * (2**attempt)
                     self.logger.info(f"Server error, retrying in {wait_time}s...")
                     await asyncio.sleep(wait_time)
                 else:
@@ -159,18 +154,17 @@ class BaseApiClient(ABC):
                     self.logger.error(f"Request failed after {self.retries} attempts")
                     raise
 
-                wait_time = self.backoff * (2 ** attempt)
+                wait_time = self.backoff * (2**attempt)
                 self.logger.info(f"Network error, retrying in {wait_time}s...")
                 await asyncio.sleep(wait_time)
-
 
         raise httpx.RequestError("Max retries exceeded")
 
     async def _get(
-            self,
-            path: str,
-            params: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None,
+        self,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         Выполнить GET запрос.
@@ -186,10 +180,10 @@ class BaseApiClient(ABC):
         return await self._request("GET", path, params=params, headers=headers)
 
     async def _post(
-            self,
-            path: str,
-            json: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None,
+        self,
+        path: str,
+        json: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         Выполнить POST запрос.

@@ -7,6 +7,7 @@ from .config import get_settings
 
 settings = get_settings()
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -22,6 +23,7 @@ async_session_maker = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:

@@ -14,8 +14,6 @@ from .core.logging_config import setup_logging
 from .api.v1.routers import books, health
 
 
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -34,8 +32,6 @@ async def lifespan(app: FastAPI):
     print("👋 Application stopped")
 
 
-
-
 app = FastAPI(
     title=settings.app_name,
     description="REST API для управления библиотечным каталогом",
@@ -44,7 +40,6 @@ app = FastAPI(
     redoc_url=settings.redoc_url,
     lifespan=lifespan,
 )
-
 
 
 app.add_middleware(
@@ -56,17 +51,13 @@ app.add_middleware(
 )
 
 
-
 register_exception_handlers(app)
-
 
 
 app.include_router(
     books.router,
     prefix=settings.api_v1_prefix,
 )
-
-
 
 
 @app.get("/")
@@ -78,8 +69,6 @@ async def root():
     }
 
 
-
-
 if __name__ == "__main__":
     import uvicorn
 
@@ -89,6 +78,3 @@ if __name__ == "__main__":
         port=8000,
         reload=settings.debug,
     )
-
-
-

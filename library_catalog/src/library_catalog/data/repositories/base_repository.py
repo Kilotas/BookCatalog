@@ -64,6 +64,3 @@ class BaseRepository(Generic[T]):
         stmt = select(self.model).limit(limit).offset(offset)
         result = await self.session.execute(stmt)
         return result.scalars().all()
-
-
-

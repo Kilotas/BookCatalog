@@ -17,14 +17,14 @@ class BookRepository(BaseRepository[Book]):
 
     # --------------------------------------------------------------------------
     async def find_by_filters(
-            self,
-            title: str | None = None,
-            author: str | None = None,
-            genre: str | None = None,
-            year: int | None = None,
-            available: bool | None = None,
-            limit: int = 20,
-            offset: int = 0,
+        self,
+        title: str | None = None,
+        author: str | None = None,
+        genre: str | None = None,
+        year: int | None = None,
+        available: bool | None = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> list[Book]:
         stmt = select(Book)
 

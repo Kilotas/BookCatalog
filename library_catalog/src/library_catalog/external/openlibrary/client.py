@@ -4,15 +4,16 @@ from typing import Dict, Any, Optional
 
 from library_catalog.external.base.base_client import BaseApiClient
 
+
 class OpenLibraryClient(BaseApiClient):
     """Клиент для Open Library API."""
 
     def __init__(
-            self,
-            base_url: str = "https://openlibrary.org",
-            timeout: float = 10.0,
-            retries: int = 3,
-            backoff: float = 0.5,
+        self,
+        base_url: str = "https://openlibrary.org",
+        timeout: float = 10.0,
+        retries: int = 3,
+        backoff: float = 0.5,
     ):
         super().__init__(base_url, timeout, retries, backoff)
 
@@ -30,10 +31,7 @@ class OpenLibraryClient(BaseApiClient):
             dict: Данные книги или пустой словарь
         """
         try:
-            data = await self._get(
-                "/search.json",
-                params={"isbn": isbn, "limit": 1}
-            )
+            data = await self._get("/search.json", params={"isbn": isbn, "limit": 1})
 
             docs = data.get("docs", [])
             if not docs:
@@ -48,20 +46,11 @@ class OpenLibraryClient(BaseApiClient):
             self.logger.error(f"Error searching by ISBN {isbn}: {e}")
             return {}
 
-    async def search_by_title_author(
-            self,
-            title: str,
-            author: str
-    ) -> Dict[str, Any]:
+    async def search_by_title_author(self, title: str, author: str) -> Dict[str, Any]:
         """Поиск по названию и автору."""
         try:
             data = await self._get(
-                "/search.json",
-                params={
-                    "title": title,
-                    "author": author,
-                    "limit": 1
-                }
+                "/search.json", params={"title": title, "author": author, "limit": 1}
             )
 
             docs = data.get("docs", [])
@@ -78,10 +67,10 @@ class OpenLibraryClient(BaseApiClient):
             return {}
 
     async def enrich(
-            self,
-            title: str,
-            author: str,
-            isbn: Optional[str] = None,
+        self,
+        title: str,
+        author: str,
+        isbn: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Обогатить данные книги.
@@ -95,7 +84,6 @@ class OpenLibraryClient(BaseApiClient):
             data = await self.search_by_isbn(isbn)
             if data:
                 return data
-
 
         return await self.search_by_title_author(title, author)
 
@@ -111,7 +99,6 @@ class OpenLibraryClient(BaseApiClient):
         """
         result = {}
 
-
         if title := doc.get("title"):
             result["title"] = title
 
@@ -121,12 +108,10 @@ class OpenLibraryClient(BaseApiClient):
             elif authors:
                 result["author"] = authors
 
-
         if cover_id := doc.get("cover_i"):
             result["cover_url"] = (
                 f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
             )
-
 
         if subjects := doc.get("subject"):
             if isinstance(subjects, list):
@@ -140,10 +125,8 @@ class OpenLibraryClient(BaseApiClient):
             else:
                 result["publisher"] = publisher
 
-
         if publish_year := doc.get("first_publish_year"):
             result["publish_year"] = publish_year
-
 
         if language := doc.get("language"):
             if isinstance(language, list) and language:
@@ -162,14 +145,8 @@ class OpenLibraryClient(BaseApiClient):
 
         return result
 
-
     def _get_cover_url(self, cover_id: int | None) -> str | None:
         """Получить URL обложки."""
         if not cover_id:
             return None
         return f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
-
-
-
-
-

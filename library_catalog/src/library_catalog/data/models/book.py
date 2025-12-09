@@ -15,7 +15,6 @@ from .constants import (
 )
 
 
-
 class Book(Base):
     """
     ORM-модель книги (Book) для каталога библиотеки.

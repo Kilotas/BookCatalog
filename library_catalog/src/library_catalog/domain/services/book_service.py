@@ -14,9 +14,9 @@ class BookService:
     """
 
     def __init__(
-            self,
-            book_repository: BookRepository,
-            openlibrary_client: OpenLibraryClient,
+        self,
+        book_repository: BookRepository,
+        openlibrary_client: OpenLibraryClient,
     ):
         self.book_repo = book_repository
         self.ol_client = openlibrary_client
@@ -77,9 +77,9 @@ class BookService:
         return BookMapper.to_show_book(book)
 
     async def update_book(
-            self,
-            book_id: UUID,
-            book_data: BookUpdate,
+        self,
+        book_id: UUID,
+        book_data: BookUpdate,
     ) -> ShowBook:
         """
         Обновить книгу.
@@ -96,8 +96,7 @@ class BookService:
             self._validate_pages(book_data.pages)
 
         updated = await self.book_repo.update(
-            book_id,
-            **book_data.dict(exclude_unset=True)
+            book_id, **book_data.dict(exclude_unset=True)
         )
 
         return BookMapper.to_show_book(updated)
@@ -114,14 +113,14 @@ class BookService:
             raise BookNotFoundException(book_id)
 
     async def search_books(
-            self,
-            title: str | None = None,
-            author: str | None = None,
-            genre: str | None = None,
-            year: int | None = None,
-            available: bool | None = None,
-            limit: int = 20,
-            offset: int = 0,
+        self,
+        title: str | None = None,
+        author: str | None = None,
+        genre: str | None = None,
+        year: int | None = None,
+        available: bool | None = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> tuple[list[ShowBook], int]:
         """
         Поиск книг с фильтрацией и пагинацией.
@@ -167,10 +166,7 @@ class BookService:
         if pages <= 0:
             raise InvalidPagesException(pages)
 
-    async def _enrich_book_data(
-            self,
-            book_data: BookCreate
-    ) -> dict | None:
+    async def _enrich_book_data(self, book_data: BookCreate) -> dict | None:
         """
         Обогатить данные книги из Open Library.
 
@@ -185,9 +181,10 @@ class BookService:
             return extra if extra else None
         except OpenLibraryException:
             import logging
+
             logger = logging.getLogger(__name__)
             logger.warning(
                 "Failed to enrich book data from Open Library",
-                extra={"title": book_data.title, "author": book_data.author}
+                extra={"title": book_data.title, "author": book_data.author},
             )
             return None
