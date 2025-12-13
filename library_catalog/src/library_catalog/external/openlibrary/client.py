@@ -2,7 +2,8 @@ import httpx
 from typing import Dict, Any, Optional
 
 
-from library_catalog.external.base.base_client import BaseApiClient
+from ..base.base_client import BaseApiClient
+
 
 
 class OpenLibraryClient(BaseApiClient):

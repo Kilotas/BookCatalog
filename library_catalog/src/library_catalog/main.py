@@ -1,35 +1,42 @@
-"""
-Library Catalog API это точка входа приложения.
-"""
-
+# src/library_catalog/main.py
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import settings
-from .core.database import dispose_engine
-from .core.exceptions import register_exception_handlers
 from .core.logging_config import setup_logging
+from .core.database import dispose_engine
+from .core.clients import clients_manager
+from .core.exceptions import register_exception_handlers
 from .api.v1.routers import books, health
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifecycle менеджер FastAPI.
-
-    Что происходит:
-    1) При старте — настраиваем логирование
-    2) При завершении — закрываем соединения с БД
-    """
     setup_logging()
-    print("🚀 Application started")
+    logger.info("🚀 Application started")
 
-    yield
+    try:
+        yield
+    finally:
+        logger.info("👋 Application stopping...")
+        try:
+            await clients_manager.close_all()
+            logger.info("Clients closed")
+        except Exception:
+            logger.exception("Failed to close clients")
 
-    await dispose_engine()
-    print("👋 Application stopped")
+        try:
+            await dispose_engine()
+            logger.info("DB engine disposed")
+        except Exception:
+            logger.exception("Failed to dispose DB engine")
+
+        logger.info("✅ Application stopped")
 
 
 app = FastAPI(
@@ -41,7 +48,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -50,31 +56,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 register_exception_handlers(app)
 
-
-app.include_router(
-    books.router,
-    prefix=settings.api_v1_prefix,
-)
+app.include_router(books.router, prefix=settings.api_v1_prefix)
+app.include_router(health.router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")
 async def root():
-    return {
-        "message": "Welcome to Library Catalog API",
-        "docs": settings.docs_url,
-        "version": "1.0.0",
-    }
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        "library_catalog.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=settings.debug,
-    )
+    return {"message": "Welcome to Library Catalog API", "docs": settings.docs_url, "version": "1.0.0"}

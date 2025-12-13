@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List
-from .constants import (
+from library_catalog.core.constants import (
     MAX_TITLE_LENGTH,
     DEFAULT_TITLE,
     MIN_PUBLISH_YEAR,

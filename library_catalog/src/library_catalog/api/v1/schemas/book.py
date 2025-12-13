@@ -3,26 +3,28 @@ from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
-from .constants import (
-    TITLE_MAX_LEN,
-    AUTHOR_MAX_LEN,
-    GENRE_MAX_LEN,
-    DESCRIPTION_MAX_LEN,
-    ISBN_MAX_LEN,
-    PAGES_MIN,
+from ....core.constants import (
+    TITLE_MAX_LENGTH,
+    AUTHOR_MAX_LENGTH,
+    GENRE_MAX_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+    ISBN_MAX_LENGTH,
     YEAR_MIN,
+    PAGES_MIN,
 )
 
 
+
 class BookBase(BaseModel):
-    title: str = Field(..., max_length=TITLE_MAX_LEN)
-    author: str = Field(..., max_length=AUTHOR_MAX_LEN)
+    title: str = Field(..., max_length=TITLE_MAX_LENGTH)
+    author: str = Field(..., max_length=AUTHOR_MAX_LENGTH)
     year: int = Field(..., ge=YEAR_MIN)
-    genre: Optional[str] = Field(None, max_length=GENRE_MAX_LEN)
+    genre: Optional[str] = Field(None, max_length=GENRE_MAX_LENGTH)
     pages: Optional[int] = Field(None, ge=PAGES_MIN)
-    isbn: Optional[str] = Field(None, max_length=ISBN_MAX_LEN)
-    description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LEN)
+    isbn: Optional[str] = Field(None, max_length=ISBN_MAX_LENGTH)
+    description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
     extra: Optional[Any] = None
+
 
 
 class BookCreate(BookBase):
@@ -59,13 +61,13 @@ class BookCreate(BookBase):
 
 
 class BookUpdate(BaseModel):
-    title: Optional[str] = Field(None, max_length=TITLE_MAX_LEN)
-    author: Optional[str] = Field(None, max_length=AUTHOR_MAX_LEN)
+    title: Optional[str] = Field(None, max_length=TITLE_MAX_LENGTH)
+    author: Optional[str] = Field(None, max_length=AUTHOR_MAX_LENGTH)
     year: Optional[int] = Field(None, ge=YEAR_MIN)
-    genre: Optional[str] = Field(None, max_length=GENRE_MAX_LEN)
+    genre: Optional[str] = Field(None, max_length=GENRE_MAX_LENGTH)
     pages: Optional[int] = Field(None, ge=PAGES_MIN)
-    isbn: Optional[str] = Field(None, max_length=ISBN_MAX_LEN)
-    description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LEN)
+    isbn: Optional[str] = Field(None, max_length=ISBN_MAX_LENGTH)
+    description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
     extra: Optional[Any] = None
     available: Optional[bool] = None
 

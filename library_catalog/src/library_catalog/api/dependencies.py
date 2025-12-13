@@ -1,57 +1,59 @@
-from functools import lru_cache
+from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import Depends
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.database import get_db
-from ..core.config import settings
+from ..core.database import get_db, async_session_maker
+from ..core.clients import clients_manager
 
-from ..data.repositories.book_repository import BookRepository
+from ..application.uow.protocol import UnitOfWorkProtocol
+from ..application.uow.sqlalchemy import SqlAlchemyUnitOfWork
+
+from ..external.protocols import MetadataGatewayProtocol
 from ..domain.services.book_service import BookService
 
-from ..external.openlibrary.client import OpenLibraryClient
+
+def get_metadata_gateway() -> MetadataGatewayProtocol:
+    """
+    Получить источник метаданных о книгах.
+
+    Реализация сейчас: OpenLibraryClient (через ClientsManager).
+    """
+    return clients_manager.get_openlibrary()
 
 
-@lru_cache
-def get_openlibrary_client() -> OpenLibraryClient:
+async def get_uow() -> AsyncGenerator[UnitOfWorkProtocol, None]:
     """
-    Создать и вернуть singleton OpenLibraryClient.
-    LRU cache гарантирует, что клиент создастся один раз.
-    """
-    return OpenLibraryClient(
-        base_url=settings.openlibrary_base_url,
-        timeout=settings.openlibrary_timeout,
-        retries=settings.openlibrary_retries,
-        backoff=settings.openlibrary_backoff,
-    )
+    DI для Unit of Work.
 
-
-async def get_book_repository(
-    db: Annotated[AsyncSession, Depends(get_db)],
-) -> BookRepository:
+    На каждый HTTP-запрос создаётся новый UoW:
+    - открывает AsyncSession
+    - предоставляет репозитории через одну сессию
+    - rollback при исключении
+    - закрывает сессию
     """
-    Возвращает экземпляр BookRepository.
-    Создаётся новый репозиторий на каждый HTTP запрос.
-    """
-    return BookRepository(db)
+    uow = SqlAlchemyUnitOfWork(async_session_maker)
+    async with uow:
+        yield uow
 
 
 async def get_book_service(
-    book_repo: Annotated[BookRepository, Depends(get_book_repository)],
-    ol_client: Annotated[OpenLibraryClient, Depends(get_openlibrary_client)],
+    uow: Annotated[UnitOfWorkProtocol, Depends(get_uow)],
+    metadata_gateway: Annotated[MetadataGatewayProtocol, Depends(get_metadata_gateway)],
 ) -> BookService:
     """
-    Создаёт BookService, внедряя в него:
-    - репозиторий (локальная БД)
-    - клиент OpenLibrary (внешние данные)
+    Создаёт BookService, внедряя:
+    - UnitOfWork (транзакции + репозитории)
+    - источник метаданных (внешний API)
     """
     return BookService(
-        book_repository=book_repo,
-        openlibrary_client=ol_client,
+        uow=uow,
+        metadata_gateway=metadata_gateway,
     )
 
 
 BookServiceDep = Annotated[BookService, Depends(get_book_service)]
-BookRepoDep = Annotated[BookRepository, Depends(get_book_repository)]
+UnitOfWorkDep = Annotated[UnitOfWorkProtocol, Depends(get_uow)]
 DbSessionDep = Annotated[AsyncSession, Depends(get_db)]
